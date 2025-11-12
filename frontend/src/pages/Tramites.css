@@ -1,0 +1,62 @@
+.tramites-card {
+  animation: fade-in 0.8s cubic-bezier(0.4,0,0.2,1);
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 16px rgba(30,58,138,0.10);
+  padding: 2.5rem 2rem 2rem 2rem;
+  text-align: center;
+  max-width: 34rem;
+  margin: 3rem auto 0 auto;
+  border: 1px solid #facc15;
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tramites-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin-bottom: 1.2rem;
+  color: #1e3a8a;
+  text-shadow: 1px 1px 2px #facc1533;
+}
+.tramites-desc {
+  font-size: 1.15rem;
+  color: #374151;
+  margin-bottom: 1.5rem;
+}
+.tramites-list {
+  text-align: left;
+  margin: 0 auto;
+  max-width: 20rem;
+  color: #1e293b;
+  list-style: disc inside;
+  font-size: 1.1rem;
+  padding-left: 1rem;
+}
+.tramites-list li {
+  margin-bottom: 0.5rem;
+}
+@media (max-width: 768px) {
+  .tramites-card {
+    max-width: 92vw;
+    padding: 1.5rem 1.25rem 1.25rem 1.25rem;
+    margin-top: 2rem;
+  }
+  .tramites-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.9rem;
+  }
+  .tramites-desc {
+    font-size: 1rem;
+  }
+  .tramites-list {
+    max-width: 100%;
+    font-size: 1rem;
+  }
+}
+@media (max-width: 480px) {
+  .tramites-title {
+    font-size: 1.55rem;
+  }
+}

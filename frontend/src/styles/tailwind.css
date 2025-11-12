@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos personalizados */
+body {
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    @apply bg-gray-100 text-gray-800;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    @apply font-bold;
+}
+
+a {
+    @apply text-blue-600 hover:text-blue-800 transition-colors;
+}
+
+.navbar {
+    @apply bg-blue-900 text-yellow-400 shadow-md;
+}
+
+.footer {
+    @apply bg-gray-800 text-white py-4;
+}
+
+.btn-primary {
+    @apply bg-yellow-400 text-blue-900 px-4 py-2 rounded font-bold hover:bg-yellow-300 transition-colors;
+}
+
+.card {
+    @apply bg-white rounded-lg shadow p-8;
+}
+
+.logo-fceac {
+    @apply h-24 w-24 rounded-full bg-white p-2 border-4 border-yellow-400 mx-auto;
+}
+
+/* Animaciones de aparición al hacer scroll */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 600ms cubic-bezier(0.4,0,0.2,1), transform 600ms cubic-bezier(0.4,0,0.2,1);
+  will-change: opacity, transform;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Respeto a usuarios con reducción de movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+}

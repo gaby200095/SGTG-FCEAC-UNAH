@@ -1,0 +1,286 @@
+/* Fondo general */
+.login-bg {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #fffb03 0%, #f9f9f9 50%, #0068ad 100%);
+  font-family: Arial, sans-serif;
+  padding: 0;
+  margin: 0;
+  
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;   /* evitar scroll horizontal accidental */
+  overflow-y: auto;     /* permitir scroll vertical */
+}
+
+/* Card contenedor */
+.login-card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 400px;
+  animation: fade-in 0.6s ease-in-out;
+}
+
+/* Título */
+.login-card h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.6rem;
+  color: #003366;
+  font-weight: bold;
+}
+
+/* Formularios */
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form label {
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+  color: #333;
+}
+
+.login-form input {
+  padding: 0.7rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.95rem;
+  transition: border-color 0.3s;
+}
+
+.login-form input:focus {
+  border-color: #0077c8;
+  box-shadow: 0 0 8px rgba(0, 119, 200, 0.5);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Botones */
+.login-form button {
+  background: #0077c8;
+  color: white;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.login-form button:hover {
+  background: #005fa3;
+  transform: translateY(-2px);
+}
+
+/* Errores */
+.error {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+/* Links de cambio login/registro */
+.login-card p {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+.login-card p span {
+  font-weight: bold;
+  color: #0077c8;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.login-card p span:hover {
+  color: #005fa3;
+}
+
+/* Animación */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  transform: translateY(-3px);
+  transition: all 0.3s ease;
+}
+@keyframes fade-zoom {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.login-card {
+  animation: fade-zoom 0.6s ease-in-out;
+}
+
+/* === Campo de contraseña simplificado === */
+.password-field {
+  position: relative;
+  width: 100%;
+}
+
+.password-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem 2.5rem 0.7rem 0.85rem; /* espacio fijo para el icono */
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  transition: border-color .18s, box-shadow .18s;
+  font-family: inherit;
+}
+
+.password-input:focus {
+  border-color: #0077c8;
+  box-shadow: 0 0 8px rgba(0,119,200,0.45);
+}
+
+.password-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #1e3a8a;
+  padding: 0;
+  outline: none;
+  transition: opacity .18s;
+}
+
+.password-toggle:hover {
+  opacity: .75;
+}
+
+.password-toggle:focus-visible {
+  box-shadow: 0 0 0 2px rgba(30,58,138,.35);
+  border-radius: 6px;
+}
+
+.password-toggle svg {
+  display: block;
+  pointer-events: none;
+}
+
+/* Campo de contraseña SIMPLE (ojo minimalista) */
+.password-field.simple {
+  position: relative;
+  width: 100%;
+}
+
+.password-input.simple {
+  width: 100%;
+  padding: 0.7rem 2.4rem 0.7rem 0.85rem; /* espacio para el icono */
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  transition: border-color .18s, box-shadow .18s;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.password-input.simple:focus {
+  border-color: #0077c8;
+  box-shadow: 0 0 6px rgba(0,119,200,0.35);
+}
+
+.password-toggle.simple {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  color: #555;
+  transition: color .15s, opacity .15s;
+}
+
+.password-toggle.simple:hover {
+  color: #0077c8;
+}
+
+.password-toggle.simple:active {
+  opacity: .7;
+}
+
+.password-toggle.simple svg {
+  pointer-events: none;
+  display: block;
+}
+
+@media (max-width:480px) {
+  .pw-input { font-size: .9rem; padding-right: 3rem; }
+  .pw-eye { width:32px; height:32px; }
+  .password-input.simple {
+    font-size: 0.9rem;
+    padding-right: 2.3rem;
+  }
+  .password-toggle.simple {
+    width: 30px;
+    height: 30px;
+    right: 6px;
+  }
+}
+
+/* Asegurar consistencia con inputs existentes */
+.login-form input[type="email"],
+.login-form input[type="text"] {
+  box-sizing: border-box;
+}
+  
+
+/* Asegurar consistencia con inputs existentes */
+.login-form input[type="email"],
+.login-form input[type="text"] {
+  box-sizing: border-box;
+}
+.login-form input[type="text"] {
+  box-sizing: border-box;
+}
+
+/* Estilos para el checklist de requisitos de contraseña */
+.pwd-reqs {
+  font-size: 0.70rem;
+  line-height: 1.2;
+  margin: 4px 0 6px;
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+.pwd-reqs .ok {
+  color: #059669; /* verde */
+}
+.pwd-reqs .fail {
+  color: #b91c1c; /* rojo */
+}
