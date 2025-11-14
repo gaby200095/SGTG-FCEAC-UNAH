@@ -1,0 +1,49 @@
+/* Card principal estilo “glass” coherente con Landing */
+.tramites-card {
+  animation: fade-in 0.8s cubic-bezier(0.4,0,0.2,1);
+  background: rgba(230,236,245,0.95);
+  backdrop-filter: saturate(110%) blur(4px);
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(2,6,23,0.10);
+  padding: 2rem 1.5rem;
+  border: 1px solid #b6c2d1;
+  width: 100%;
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tramites-title {
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 1rem;
+  color: #0f172a;
+}
+.tramites-desc {
+  font-size: 1.05rem;
+  color: #334155;
+  margin-bottom: 1.5rem;
+}
+.tramites-list {
+  text-align: left;
+  margin: 0;
+  color: #1f2937;
+  list-style: disc inside;
+  font-size: 1.05rem;
+  padding-left: .5rem;
+}
+.tramites-list li { margin-bottom: 0.5rem; }
+@media (max-width: 1024px) {
+  .tramites-title { font-size: 1.8rem; }
+}
+@media (max-width: 768px) {
+  .tramites-card {
+    padding: 1.25rem;
+  }
+  .tramites-title { font-size: 1.6rem; }
+  .tramites-desc { font-size: 1rem; }
+  .tramites-list { font-size: 1rem; }
+}
+@media (max-width: 480px) {
+  .tramites-title { font-size: 1.45rem; }
+}
