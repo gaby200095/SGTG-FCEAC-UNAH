@@ -23,48 +23,19 @@ const Home = () => {
   }, []);
 
   return (
-    <div
-      className="home-bg"
-      style={{
-        minHeight: '100vh',
-        position: 'relative',
-        background: `url(${process.env.PUBLIC_URL + '/fondo1.png'}) center/cover no-repeat fixed`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem 0',
-        overflowX: 'hidden' // antes: overflow: 'hidden'
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: 'linear-gradient(120deg, rgba(30,58,138,0.55) 0%, rgba(250,204,21,0.25) 100%)',
-          zIndex: 1
-        }}
-      />
-
-      <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: '1100px', padding: '0 1rem' }}>
-        {/* FUSIÓN: HERO + BIENVENIDA EN UNA SOLA TARJETA */}
-        <div className="home-card reveal">
+    <div className="hero-wrap" style={{ backgroundImage:`url(${process.env.PUBLIC_URL + '/fondo1.png'})` }}>
+      <div className="hero-overlay" />
+      <div className="page-wrap" style={{ position:'relative', zIndex:2 }}>
+        {/* HERO CARD */}
+        <div className="reveal card-hero" style={{ padding:'2rem', textAlign:'center', maxWidth:900, margin:'3rem auto 0' }}>
           <h1 className="home-title">Bienvenido(a) al Sistema de Gestión de Trámites de Graduación</h1>
           <p className="home-desc">
             Gestiona tus trámites de graduación de la Facultad de Ciencias Económicas, Administrativas y Contables de forma rápida y segura.
           </p>
           <img src={process.env.PUBLIC_URL + '/LOGO FCEAC.png'} alt="Logo FCEAC" className="home-logo" />
 
-          {/* Bloque de bienvenida integrado */}
-          <div
-            style={{
-              borderTop: '1px solid #facc15',
-              marginTop: '1rem',
-              paddingTop: '1rem'
-            }}
-          >
+          {/* Separador */}
+          <div style={{ borderTop:'1px solid #facc15', marginTop:'1rem', paddingTop:'1rem' }}>
             <p style={{ color: '#374151', textAlign: 'center', marginBottom: '0.5rem' }}>
               Centraliza tus trámites de graduación de forma simple, transparente y segura.
             </p>
@@ -76,18 +47,12 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Secciones con animación al hacer scroll */}
-        <section className="reveal" style={{ margin: '2rem auto 0', maxWidth: '1100px' }}>
-          <h2 style={{ color: '#1e3a8a', fontWeight: 800, textAlign: 'center', marginBottom: '1rem' }}>
+        {/* ACCESOS RÁPIDOS */}
+        <section className="reveal section-gap" style={{ maxWidth:'1100px' }}>
+          <h2 style={{ color:'#1e3a8a', fontWeight:800, textAlign:'center', marginBottom:'1rem' }}>
             Accesos rápidos
           </h2>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-              gap: '1rem'
-            }}
-          >
+          <div className="grid-3">
             <Link to="/tramites" style={{ textDecoration: 'none' }}>
               <div
                 style={{
@@ -142,17 +107,8 @@ const Home = () => {
           </div>
         </section>
 
-        <section
-          className="reveal"
-          style={{
-            margin: '2rem auto 0',
-            background: 'rgba(255,255,255,0.95)',
-            border: '1px solid #facc15',
-            borderRadius: '0.75rem',
-            boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-            padding: '1.25rem'
-          }}
-        >
+        {/* CÓMO USAR */}
+        <section className="reveal card-hero" style={{ margin:'2rem auto 0', padding:'1.25rem' }}>
           <h2 style={{ color: '#1e3a8a', fontWeight: 800, textAlign: 'center', marginBottom: '0.75rem' }}>
             ¿Cómo usar la plataforma?
           </h2>
@@ -198,14 +154,9 @@ const Home = () => {
           </div>
         </section>
 
-        <section className="reveal" style={{ margin: '2rem auto 0', maxWidth: '1100px' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-              gap: '1rem'
-            }}
-          >
+        {/* BENEFICIOS */}
+        <section className="reveal section-gap" style={{ maxWidth:'1100px' }}>
+          <div className="grid-3">
             {[
               { icon: '⚡', t: 'Rápido y centralizado', d: 'Todo el proceso en una sola plataforma.' },
               { icon: '🔔', t: 'Notificaciones', d: 'Enteráte de cambios y requisitos al instante.' },
@@ -230,18 +181,8 @@ const Home = () => {
           </div>
         </section>
 
-        <section
-          className="reveal"
-          style={{
-            margin: '2rem auto 0',
-            background: '#ffffff',
-            border: '1px solid #facc15',
-            borderRadius: '0.75rem',
-            boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-            padding: '1rem',
-            maxWidth: '1100px'
-          }}
-        >
+        {/* AVISOS */}
+        <section className="reveal card-hero" style={{ margin:'2rem auto 0', padding:'1rem', maxWidth:'1100px' }}>
           <h2 style={{ color: '#1e3a8a', fontWeight: 800, textAlign: 'center', marginBottom: '0.75rem' }}>
             Noticias y avisos importantes
           </h2>
@@ -303,17 +244,8 @@ const Home = () => {
           </div>
         </section>
 
-        <section
-          className="reveal"
-          style={{
-            margin: '2rem auto 0',
-            background: '#ffffff',
-            border: '1px solid #facc15',
-            borderRadius: '0.75rem',
-            boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-            padding: '1rem'
-          }}
-        >
+        {/* FAQ */}
+        <section className="reveal card-hero" style={{ margin:'2rem auto 0', padding:'1rem' }}>
           <h2 style={{ color: '#1e3a8a', fontWeight: 800, textAlign: 'center', marginBottom: '0.75rem' }}>
             Preguntas frecuentes
           </h2>
@@ -331,35 +263,17 @@ const Home = () => {
           </details>
         </section>
 
-        <section className="reveal" style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <Link to="/tramites" style={{ textDecoration: 'none' }}>
-            <button
-              style={{
-                background: '#facc15',
-                color: '#1e3a8a',
-                fontWeight: 800,
-                border: 0,
-                borderRadius: '0.5rem',
-                padding: '0.75rem 1.5rem',
-                cursor: 'pointer',
-                boxShadow: '0 2px 10px rgba(30,58,138,0.15)'
-              }}
-            >
+        {/* CTA */}
+        <section className="reveal" style={{ textAlign:'center', marginBottom:'2rem' }}>
+          <Link to="/tramites" style={{ textDecoration:'none' }}>
+            <button className="btn btn-primary-unah">
               Comenzar trámite
             </button>
           </Link>
         </section>
 
-        <footer
-          className="reveal"
-          style={{
-            background: '#1e3a8a',
-            color: '#ffffff',
-            borderTop: '4px solid #facc15',
-            marginTop: '1rem',
-            padding: '1rem 0.75rem'
-          }}
-        >
+        {/* FOOTER */}
+        <footer className="reveal footer-academic">
           <div
             style={{
               maxWidth: '1100px',

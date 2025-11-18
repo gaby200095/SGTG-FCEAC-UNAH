@@ -1,226 +1,271 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
 import './Navbar.css';
+import { Link, useLocation, useHistory } from 'react-router-dom';
 import { useAuth } from '../state/AuthContext';
 
 const Navbar = () => {
-    const [open, setOpen] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
-    const [profileOpen, setProfileOpen] = useState(false);
-    const menuRef = useRef(null);
-    const profileRef = useRef(null);
-    const history = useHistory();
-    const location = useLocation(); // NUEVO para cerrar menú al cambiar ruta
-    const { user, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const logged = !!user;
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const profileRef = useRef(null);
+  const location = useLocation();
+  const history = useHistory();
 
-    // NUEVO: estado para nombre completo garantizado
-    const [fullName, setFullName] = useState('');
+  // Forzar logout si hay sesión previa y no estamos en panel privado
+  useEffect(() => {
+    const isPanel = /^\/panel\//.test(window.location.pathname);
+    if (!isPanel && (localStorage.getItem('user') || localStorage.getItem('accessToken'))) {
+      localStorage.removeItem('user');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      sessionStorage.removeItem('pending2FA');
+      sessionStorage.removeItem('lastLoginCreds');
+      // Si hay sesión en memoria, recargar para limpiar contexto
+      if (logged) window.location.reload();
+    }
+    // eslint-disable-next-line
+  }, []);
 
-    // NUEVO: obtener nombre completo si no viene en el objeto user
-    useEffect(() => {
-      let abort = false;
-      (async () => {
-        if (!user) {
-          setFullName('');
-          return;
-        }
-        // Si ya trae nombres en el objeto user, utilizarlos
-        const localNombre = (user.nombre_usuario || user.nombre || '').trim();
-        const localApellido = (user.apellido_usuario || user.apellido || '').trim();
-        if (localNombre || localApellido) {
-          const compuesto = `${localNombre} ${localApellido}`.trim();
-          setFullName(compuesto.toUpperCase());
-          return;
-        }
-        // Intentar cargar desde tabla usuario_sistema
-        try {
-          const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5001/api'}/table/usuario_sistema?limit=500`);
-          if (!res.ok) return;
-          const rows = await res.json();
-          if (abort) return;
-          const registro = rows.find(r => r.id_usuario === user.id_usuario);
-          if (registro) {
-            const n = (registro.nombre_usuario || registro.nombre || '').trim();
-            const a = (registro.apellido_usuario || registro.apellido || '').trim();
-            const comp = `${n} ${a}`.trim();
-            setFullName(comp ? comp.toUpperCase() : (user.correo?.split('@')[0] || '').toUpperCase());
-          } else {
-            setFullName((user.correo?.split('@')[0] || '').toUpperCase());
-          }
-        } catch {
-          setFullName((user.correo?.split('@')[0] || '').toUpperCase());
-        }
-      })();
-      return () => { abort = true; };
-    }, [user]);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-    // Reemplaza displayName previo usando fullName
-    const displayName = fullName; // ahora siempre mayúsculas si se logra construir
-    const avatarTxt = (displayName || user?.correo || 'U').trim().charAt(0).toUpperCase();
-
-    useEffect(() => {
-        const mq = window.matchMedia('(max-width: 768px)');
-        const onChange = (e) => setIsMobile(e.matches);
-        setIsMobile(mq.matches);
-        mq.addEventListener('change', onChange);
-        return () => mq.removeEventListener('change', onChange);
-    }, []);
-
-    useEffect(() => {
-      const handler = e => {
-        if (profileRef.current && !profileRef.current.contains(e.target)) {
-          setProfileOpen(false);
-        }
-      };
-      document.addEventListener('mousedown', handler);
-      return () => document.removeEventListener('mousedown', handler);
-    }, []);
-
-    useEffect(()=>{ setOpen(false); setProfileOpen(false); }, [location.pathname]);
-
-    // NUEVO: cerrar con Escape
-    useEffect(()=>{
-      const onKey = (e)=>{
-        if(e.key === 'Escape'){
-          setProfileOpen(false);
-          setOpen(false);
-        }
-      };
-      window.addEventListener('keydown', onKey);
-      return ()=>window.removeEventListener('keydown', onKey);
-    },[]);
-
-    const handleLogout = async () => {
-      try { await logout(); } finally {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('user');
-        history.push('/login');
-        setProfileOpen(false);
-      }
+  useEffect(() => {
+    const handler = e => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
     };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
-    const logged = !!user;
-    const role = user?.roles?.[0];
+  const handleLogout = async () => {
+    try { await logout(); } finally { history.replace('/login'); }
+  };
 
-    // NUEVO: menús condicionales
-    const publicLinks = (
-      <>
-        <Link to="/" className="navbar-link" onClick={()=>setOpen(false)}>Inicio</Link>
-        <Link to="/tramites" className="navbar-link" onClick={()=>setOpen(false)}>Trámites</Link>
-        <Link to="/contacto" className="navbar-link" onClick={()=>setOpen(false)}>Contacto</Link>
-        <Link to="/acerca" className="navbar-link" onClick={()=>setOpen(false)}>Acerca del SGTG</Link>
-        <Link to="/login" onClick={()=>setOpen(false)}>
-          <button className="navbar-login">Iniciar Sesión</button>
-        </Link>
-      </>
-    );
+  const isEstPanel = (location.pathname || '').startsWith('/panel/estudiante');
+  const isSecPanel = (location.pathname || '').startsWith('/panel/secretaria');
+  // NUEVO: Detectar panel de coordinador académico
+  const isCoordPanel = (location.pathname || '').startsWith('/panel/coordinador');
+  // NUEVO: Detectar panel administrativo
+  const isAdmPanel = (location.pathname || '').startsWith('/panel/administrativo');
+  const toggleSidebar = () => {
+    try {
+      if (isEstPanel) window.dispatchEvent(new CustomEvent('est:toggleSidebar'));
+      if (isSecPanel) window.dispatchEvent(new CustomEvent('sec:toggleSidebar'));
+      if (isCoordPanel) window.dispatchEvent(new CustomEvent('coord:toggleSidebar'));
+      // Hamburguesa para panel administrativo
+      if (isAdmPanel) window.dispatchEvent(new CustomEvent('adm:toggleSidebar'));
+    } catch {}
+  };
 
-    const panelPath =
-      role === 'coordinador' ? '/panel/coordinador' :
-      role === 'administrativo' ? '/panel/administrativo' :
-      role === 'secretaria_general' ? '/panel/secretaria' :
-      '/panel/estudiante';
+  // Nombre amigable igual que en el panel estudiante
+  const friendlyName =
+    [user?.nombre_usuario, user?.nombre, user?.apellido_usuario, user?.apellido]
+      .filter(Boolean)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
 
-    const privateLinks = (
-      <>
-        <Link to={panelPath} className="navbar-link" onClick={()=>setOpen(false)}>Panel</Link>
-        <Link to="/tramites" className="navbar-link" onClick={()=>setOpen(false)}>Trámites</Link>
-        <Link to="/expedientes" className="navbar-link" onClick={()=>setOpen(false)}>Expedientes</Link>
-        {/* Se pueden añadir más enlaces internos aquí */}
-      </>
-    );
+  const correo = user?.correo_usuario || user?.correo || '';
 
-    // NUEVO: cálculo dinámico de maxHeight en móvil (incluye menú perfil)
-    const mobileDynamicStyle = isMobile
-      ? {
-          maxHeight: open
-            ? (profileOpen ? '100vh' : `${menuRef.current?.scrollHeight || 480}px`)
-            : 0,
-          padding: open ? '0.75rem 0.25rem 0.75rem 0' : 0,
-          overflowY: open ? 'auto' : 'hidden'
-        }
-      : undefined;
+  return (
+    <nav className={`navbar ${scrolled ? 'scrolled' : ''} ${logged ? 'navbar-auth' : 'navbar-public'}`} aria-label="Barra de navegación">
+      <div className="navbar-container" style={{ justifyContent: 'space-between' }}>
+        {/* Izquierda: logo/título o controles del panel */}
+        <div className="navbar-logo-group">
+          {!logged && (
+            <>
+              <Link to="/" onClick={()=>setMenuOpen(false)}>
+                <img src={process.env.PUBLIC_URL + '/LOGO FCEAC.png'} alt="Logo FCEAC" className="navbar-logo" />
+              </Link>
+              <span className="navbar-title">SGTG - FCEAC UNAH</span>
+              <button
+                type="button"
+                className="navbar-burger"
+                aria-label="Abrir menú"
+                aria-controls="navbar-menu"
+                aria-expanded={menuOpen}
+                onClick={()=>setMenuOpen(v=>!v)}
+              >
+                ☰
+              </button>
+            </>
+          )}
+          {logged && isEstPanel && (
+            <>
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                aria-label="Alternar menú"
+                title="Alternar menú"
+                style={{
+                  background:'rgba(255,255,255,.12)',
+                  border:'1px solid rgba(255,255,255,.25)',
+                  color:'#fff',
+                  borderRadius:8,
+                  padding:'6px 10px',
+                  fontWeight:800,
+                  cursor:'pointer'
+                }}
+              >
+                ☰
+              </button>
+              <span className="navbar-title">Panel del Estudiante</span>
+            </>
+          )}
+          {logged && isSecPanel && (
+            <>
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                aria-label="Alternar menú"
+                title="Alternar menú"
+                style={{
+                  background:'rgba(255,255,255,.12)',
+                  border:'1px solid rgba(255,255,255,.25)',
+                  color:'#fff',
+                  borderRadius:8,
+                  padding:'6px 10px',
+                  fontWeight:800,
+                  cursor:'pointer'
+                }}
+              >
+                ☰
+              </button>
+              <span className="navbar-title">Panel de Secretaría Académica</span>
+            </>
+          )}
+          {/* NUEVO: Panel de Coordinador Académico */}
+          {logged && isCoordPanel && (
+            <>
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                aria-label="Alternar menú"
+                title="Alternar menú"
+                style={{
+                  background: 'rgba(255,255,255,0.12)',
+                  border: '1px solid #fff',
+                  color: '#fff',
+                  borderRadius: 8,
+                  padding: '6px 14px',
+                  fontWeight: 900,
+                  fontSize: 22,
+                  cursor: 'pointer',
+                  marginRight: 8
+                }}
+              >
+                ☰
+              </button>
+              <span className="navbar-title" style={{ color: '#fff' }}>
+                Panel de Coordinador Académico
+              </span>
+            </>
+          )}
+          {/* NUEVO: Panel Administrativo */}
+          {logged && isAdmPanel && (
+            <>
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                aria-label="Alternar menú"
+                title="Alternar menú"
+                style={{
+                  background: 'rgba(255,255,255,0.12)',
+                  border: '1px solid #fff',
+                  color: '#fff',
+                  borderRadius: 8,
+                  padding: '6px 14px',
+                  fontWeight: 900,
+                  fontSize: 22,
+                  cursor: 'pointer',
+                  marginRight: 8
+                }}
+              >
+                ☰
+              </button>
+              <span className="navbar-title" style={{ color: '#fff', fontWeight: 900, fontSize: 20, textTransform: 'uppercase', letterSpacing: '.5px' }}>
+                Panel Administrativo
+              </span>
+            </>
+          )}
+        </div>
 
-    return (
-        <nav className={`navbar ${logged ? 'navbar-auth' : 'navbar-public'}`}>
-          <div className="navbar-container">
-                <div className="navbar-logo-group">
-                    <Link to={logged ? panelPath : '/'} onClick={() => setOpen(false)}>
-                        <img src={process.env.PUBLIC_URL + '/LOGO FCEAC.png'} alt="Logo FCEAC" className="navbar-logo" />
-                    </Link>
-                    <span className="navbar-title">
-                        SGTG - FCEAC UNAH
-                    </span>
-                    <button
-                        type="button"
-                        className="navbar-burger"
-                        aria-label="Abrir menú"
-                        aria-controls="navbar-menu"
-                        aria-expanded={open}
-                        onClick={() => setOpen(v => !v)}
-                    >
-                        ☰
-                    </button>
-                </div>
-                <div
-                    id="navbar-menu"
-                    ref={menuRef}
-                    className={`navbar-links ${open ? 'open' : ''} ${profileOpen ? 'profile-expanded' : ''}`}
-                    aria-hidden={isMobile ? (!open) : false}
-                    style={mobileDynamicStyle}
-                >
-                    {!logged && publicLinks}
-
-                    {logged && (
-                      <>
-                        {privateLinks}
-                        <div
-                          ref={profileRef}
-                          className={`navbar-profile-wrapper ${profileOpen ? 'open' : ''}`} // quitado 'reveal'
-                        >
-                          <button
-                            type="button"
-                            className={`navbar-profile-trigger ${profileOpen ? 'open' : ''}`}
-                            onClick={()=>setProfileOpen(o=>!o)}
-                            aria-haspopup="true"
-                            aria-expanded={profileOpen}
-                            aria-label="Menú de perfil"
-                          >
-                            <span className="navbar-profile-avatar">{avatarTxt}</span>
-                            <span className="navbar-profile-texts">
-                              <span className="navbar-profile-name" title={displayName}>{displayName}</span>
-                              <span className="navbar-profile-mail" title={user.correo}>{user.correo}</span>
-                            </span>
-                            <span className={`navbar-profile-caret ${profileOpen?'open':''}`}>▾</span>
-                          </button>
-                          {profileOpen && (
-                            <>
-                              {/* Overlay móvil / pantallas pequeñas */}
-                              <div
-                                className="navbar-profile-overlay"
-                                onClick={()=>setProfileOpen(false)}
-                              />
-                              <div className="navbar-profile-menu" role="menu"> {/* quitado 'reveal' */}
-                                <div className="profile-menu-group">
-                                  {/* Eliminados enlaces duplicados Panel / Trámites / Expedientes */}
-                                  <button
-                                    type="button"
-                                    className="profile-menu-item danger"
-                                    onClick={handleLogout}
-                                  >
-                                    Cerrar sesión
-                                  </button>
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </>
-                    )}
-                 </div>
+        {/* Centro: enlaces públicos */}
+        {!logged && (
+          <>
+            {menuOpen && <div className="navbar-menu-overlay" onClick={()=>setMenuOpen(false)} aria-hidden />}
+            <div id="navbar-menu" className={`navbar-links ${menuOpen ? 'open' : ''}`} aria-hidden={false}>
+              <Link to="/" className="navbar-link" onClick={()=>setMenuOpen(false)}>Inicio</Link>
+              <Link to="/tramites" className="navbar-link" onClick={()=>setMenuOpen(false)}>Trámites</Link>
+              <Link to="/contacto" className="navbar-link" onClick={()=>setMenuOpen(false)}>Contacto</Link>
+              <Link to="/recursos" className="navbar-link" onClick={()=>setMenuOpen(false)}>Recursos</Link>
+              <Link to="/login" onClick={()=>setMenuOpen(false)}>
+                <button className="navbar-login">Iniciar Sesión</button>
+              </Link>
             </div>
-        </nav>
-    );
+          </>
+        )}
+
+        {/* Derecha: perfil solo cuando está autenticado */}
+        {logged && (
+          <div ref={profileRef} className={`navbar-profile-wrapper ${profileOpen ? 'open' : ''}`}>
+            <button
+              type="button"
+              className={`navbar-profile-trigger ${profileOpen ? 'open' : ''}`}
+              onClick={()=>setProfileOpen(o=>!o)}
+              aria-haspopup="true"
+              aria-expanded={profileOpen}
+              aria-label="Menú de perfil"
+              title={correo}
+              style={{ minWidth: 120 }}
+            >
+              <span className="navbar-profile-avatar">{(friendlyName || correo).charAt(0).toUpperCase()}</span>
+              <span className="navbar-profile-texts">
+                <span className="navbar-profile-name" title={friendlyName}>{friendlyName || correo}</span>
+                <span className="navbar-profile-mail" title={correo}>{correo}</span>
+              </span>
+              <span className={`navbar-profile-caret ${profileOpen?'open':''}`}>▾</span>
+            </button>
+            {profileOpen && (
+              <div className="navbar-profile-menu" role="menu" style={{ minWidth: 220 }}>
+                <div className="profile-menu-group" style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb', background: '#f8fafc', borderRadius: '14px 14px 0 0' }}>
+                  <div style={{ fontWeight: 700, color: '#1e40af', fontSize: 15 }}>{friendlyName || correo}</div>
+                  <div style={{ color: '#64748b', fontSize: 13, marginTop: 2, wordBreak: 'break-all' }}>{correo}</div>
+                </div>
+                <div className="profile-menu-group" style={{ padding: '10px 16px' }}>
+                  <button
+                    type="button"
+                    className="profile-menu-item danger"
+                    style={{
+                      background: '#fef2f2',
+                      color: '#dc2626',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '10px 0',
+                      width: '100%',
+                      fontWeight: 700,
+                      fontSize: 15,
+                      cursor: 'pointer'
+                    }}
+                    onClick={logout}
+                  >
+                    <i className="fas fa-sign-out-alt" style={{ marginRight: 8 }}></i>
+                    Cerrar sesión
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </nav>
+  );
 };
 
 export default Navbar;

@@ -1,53 +1,66 @@
+/* Tarjeta principal adaptada a estilo "glass" */
 .acerca-card {
   animation: fade-in 0.8s cubic-bezier(0.4,0,0.2,1);
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 2px 16px rgba(30,58,138,0.10);
-  padding: 2.5rem 2rem 2rem 2rem;
-  text-align: left;
-  max-width: 40rem;
-  margin: 3rem auto 0 auto;
-  border: 1px solid #facc15;
+  background: rgba(230,236,245,0.95);
+  backdrop-filter: saturate(110%) blur(4px);
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(2,6,23,0.10);
+  padding: 1.25rem;
+  border: 1px solid #b6c2d1;
+  width: 100%;
+  margin: 0;
 }
+
+/* Tipografía y jerarquía */
 .acerca-title {
-  font-size: 2.2rem;
+  font-size: clamp(1.6rem, 2vw, 2rem);
   font-weight: 900;
-  margin-bottom: 1.2rem;
-  color: #1e3a8a;
-  text-align: center;
-  text-shadow: 1px 1px 2px #facc1533;
+  color: #0f172a;
+  margin-bottom: 0.6rem;
 }
 .acerca-desc {
-  font-size: 1.1rem;
-  color: #374151;
-  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: #334155;
+  margin-bottom: 0.9rem;
 }
-.acerca-list-section {
-  margin: 1.5rem 0;
-}
+.acerca-list-section { margin-top: 0.8rem; }
 .acerca-subtitle {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #1e3a8a;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
   margin-bottom: 0.5rem;
 }
 .acerca-list {
   list-style: disc inside;
-  color: #1e293b;
-  font-size: 1.08rem;
-  margin-left: 1rem;
-  margin-bottom: 1rem;
+  color: #1f2937;
+  font-size: 1rem;
+  padding-left: 0.5rem;
+  margin-bottom: 0.75rem;
 }
-.acerca-list li {
-  margin-bottom: 0.5rem;
-}
+.acerca-list li { margin-bottom: 0.45rem; }
 .acerca-final {
-  font-size: 1.08rem;
-  color: #374151;
-  margin-top: 1.5rem;
-  font-style: italic;
+  font-size: 1rem;
+  color: #475569;
+  margin-top: 0.8rem;
+  line-height: 1.45;
 }
+
+/* CTA / aside */
+.acerca-aside {
+  display: grid;
+  gap: 8px;
+}
+
+/* Animación */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(30px); }
+  from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .acerca-card { padding: 1rem; }
+  .acerca-title { font-size: 1.45rem; text-align: left; }
+  .acerca-desc, .acerca-final { font-size: 0.98rem; }
+  .acerca-list { font-size: 0.98rem; }
 }
