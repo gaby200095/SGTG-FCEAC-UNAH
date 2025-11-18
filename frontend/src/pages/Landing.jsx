@@ -18,8 +18,10 @@ function Landing() {
   });
   const [error, setError] = useState(null);
 
+  const API = (process.env.REACT_APP_API_URL || 'http://localhost:5001/api').replace(/\/+$/, '');
+
   useEffect(() => {
-    fetch('http://localhost:5001/api/landing', { cache: 'no-store' })
+    fetch(`${API}/landing`, { cache: 'no-store' })
       .then(res => res.ok ? res.json() : Promise.reject(new Error('Respuesta no válida')))
       .then(data => {
         if (data && (data.titulo || data.descripcion || Array.isArray(data.beneficios))) {
@@ -56,389 +58,289 @@ function Landing() {
     return () => obs.disconnect();
   }, []);
 
+  // NUEVO: datos de UI para evitar comentarios dentro de JSX
+  const fechasProximas = [
+    { f: '15 Mar', t: 'Inscripción a acto de graduación' },
+    { f: '28 Mar', t: 'Límite para carga de documentos' },
+    { f: '05 Abr', t: 'Publicación de observaciones' }
+  ];
+  const kpis = [
+    { k:'Carreras', v:'3+', d:'FCEAC – Programas habilitados' },
+    { k:'Trámites activos', v:'100+', d:'Gestión centralizada y segura' },
+    { k:'Tiempo de respuesta', v:'48h', d:'Promedio de atención' },
+    { k:'Disponibilidad', v:'24/7', d:'Plataforma en línea' },
+  ];
+  const pasos = [
+    { n:1, t:'Ingreso', d:'Accede con tu cuenta (institucional o personal válida).' },
+    { n:2, t:'Selección', d:'Elige el trámite que necesitas iniciar.' },
+    { n:3, t:'Documentación', d:'Adjunta los requisitos solicitados.' },
+    { n:4, t:'Seguimiento', d:'Monitorea avances y avisos en tu panel.' },
+  ];
+  const avisos = [
+    { fecha: '15 Mar 2025', t: 'Inscripción a acto de graduación', d: 'Inicio del periodo de inscripción.' },
+    { fecha: '28 Mar 2025', t: 'Límite carga de documentos', d: 'Último día para adjuntar requisitos.' },
+    { fecha: '05 Abr 2025', t: 'Revisión de expedientes', d: 'Publicación de observaciones.' },
+    { fecha: '4 agosto', t: 'Recepción de expedientes', d: 'Inicio de recepción (Ceremonia dic. 2025).' },
+    { fecha: '8 sept.', t: 'Límite con honores', d: 'Entrega de expedientes para honores.' },
+    { fecha: '30 sept.', t: 'Límite sin honores', d: 'Entrega de expedientes sin distinción.' },
+  ];
+
+  // Responsive: desactivar background-attachment: fixed en móviles para evitar jitter
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const onChange = (e) => setIsNarrow(e.matches);
+    setIsNarrow(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  // Estilo de tarjeta “soft surface” (menos claro, mejor contraste y legibilidad)
+  const glassCard = {
+    background: 'rgba(230, 236, 245, 0.95)', // azul-gris suave (menos blanco)
+    backdropFilter: 'saturate(110%) blur(4px)',
+    border: '1px solid #b6c2d1',
+    boxShadow: '0 10px 24px rgba(2,6,23,0.10)',
+  };
+
   return (
     <div
-      className="home-bg"
+      className="hero-wrap"
+      role="main"
       style={{
-        minHeight: '100vh',
-        position: 'relative',
-        background: `url(${process.env.PUBLIC_URL + '/fondo1.png'}) center/cover no-repeat fixed`,
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        padding: '2rem 0',
-        overflowX: 'hidden' // antes: overflow: 'hidden'
+        // Fondo gris-azulado más marcado (resalta los componentes y reduce el blanco)
+        backgroundColor: '#0c1a2b',
+        backgroundImage: `
+          radial-gradient(1100px 520px at -18% -12%, rgba(37,56,94,.25), transparent 60%),
+          radial-gradient(980px 420px at 118% -10%, rgba(250,204,21,.10), transparent 45%),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Cg fill='%23334155' fill-opacity='0.22'%3E%3Ccircle cx='1' cy='1' r='1'/%3E%3C/g%3E%3C/svg%3E"),
+          linear-gradient(180deg, #0c1a2b 0%, #0f172a 55%, #102038 100%)
+        `,
+        backgroundAttachment: `${isNarrow ? 'scroll,scroll,scroll,scroll' : 'fixed,fixed,scroll,fixed'}`,
+        backgroundRepeat: 'no-repeat,no-repeat,repeat,no-repeat',
+        backgroundSize: 'cover,cover,auto,cover'
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(120deg, rgba(30,58,138,0.55) 0%, rgba(250,204,21,0.25) 100%)',
-          zIndex: 1
-        }}
-      />
-      {/* Contenido principal (hero + secciones) */}
-      <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: '1100px', padding: '0 1rem' }}>
-        {/* HERO + BIENVENIDA UNIFICADOS */}
+      <div className="page-wrap" style={{ position: 'relative', zIndex: 2 }}>
+        {/* HERO */}
         <section
+          id="hero"
           className="reveal"
           style={{
-            background: '#fff',
-            borderRadius: '1rem',
-            boxShadow: '0 2px 16px rgba(30,58,138,0.10)',
-            padding: '2.5rem 2rem 2rem 2rem',
-            textAlign: 'center',
-            maxWidth: '900px',
-            margin: '3rem auto 0 auto',
-            border: '1px solid #facc15'
+            padding: 'clamp(0.9rem, 1.2vw + .6rem, 2rem)',
+            margin: 'clamp(.6rem, 2vw, 2rem) auto 0',
+            ...glassCard
           }}
         >
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 900, color: '#1e3a8a', marginBottom: '1.2rem', textShadow: '1px 1px 2px #facc1533' }}>
-            {contenido.titulo}
-          </h1>
-          <p style={{ fontSize: '1.15rem', color: '#374151', marginBottom: '1rem' }}>
-            {contenido.descripcion}
-          </p>
-          {error && (
-            <p style={{ color: '#b45309', fontWeight: 600, marginBottom: '0.75rem' }}>
-              {error}
-            </p>
-          )}
-          <ul style={{ listStyle: 'disc inside', color: '#1e293b', lineHeight: 1.6, textAlign: 'left', maxWidth: '720px', margin: '0.5rem auto 0' }}>
-            {contenido.beneficios.map((b, i) => (
-              <li key={i}>{b}</li>
-            ))}
-          </ul>
-        </section>
-
-        {/* ACCESOS RÁPIDOS */}
-        <section className="reveal" style={{ margin: '2rem auto 0', maxWidth: '1100px' }}>
-          <h2 style={{ color: '#1e3a8a', fontWeight: 800, textAlign: 'center', marginBottom: '1rem' }}>
-            Accesos rápidos
-          </h2>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-              gap: '1rem'
-            }}
-          >
-            <Link to="/tramites" style={{ textDecoration: 'none' }}>
-              <div
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #facc15',
-                  borderRadius: '0.75rem',
-                  boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-                  padding: '1.25rem',
-                  textAlign: 'center',
-                  color: '#1e3a8a',
-                  transition: 'transform .15s ease, box-shadow .15s ease'
-                }}
-              >
-                <div style={{ fontSize: '2rem' }}>📝</div>
-                <h3 style={{ fontWeight: 800, marginTop: '0.5rem' }}>Iniciar trámite</h3>
-                <p style={{ color: '#374151', marginTop: '0.25rem' }}>Solicitud, inscripción y seguimiento.</p>
+          <div className="w-full max-w-[1200px] mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+              {/* Columna izquierda (texto + CTA) */}
+              <div>
+                <h1
+                  style={{
+                    color: '#0f172a', // título oscuro sobre card clara
+                    fontWeight: 900,
+                    lineHeight: 1.15,
+                    marginBottom: '0.5rem',
+                    fontSize: 'clamp(1.2rem, 1.7vw + 1rem, 2.05rem)',
+                    wordWrap: 'break-word',
+                    wordBreak: 'break-word',
+                    hyphens: 'auto'
+                  }}
+                >
+                  {contenido.titulo}
+                </h1>
+                <p
+                  className="break-words"
+                  style={{ color: '#334155', fontSize: 'clamp(.98rem, .55vw + .78rem, 1.08rem)', marginBottom: '0.75rem', maxWidth: '70ch' }}
+                >
+                  {contenido.descripcion}
+                </p>
+                {error && (
+                  <div style={{ background:'#fff7ed', color:'#9a3412', padding:'8px 12px', borderRadius:8, fontWeight:600, margin:'0.5rem 0' }}>
+                    {error}
+                  </div>
+                )}
+                <div className="grid gap-2 mt-2 text-slate-800">
+                  {contenido.beneficios.slice(0, 3).map((b, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="inline-block" style={{ width: 10, height: 10, borderRadius: 9999, background: '#facc15' }} />
+                      <span className="break-words">{b}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2 flex-wrap mt-4">
+                  <Link to="/tramites" style={{ textDecoration: 'none' }}>
+                    <button className="btn btn-primary-unah">Comenzar un trámite</button>
+                  </Link>
+                  <Link to="/acerca" style={{ textDecoration: 'none' }}>
+                    <button className="btn btn-outline-unah">Acerca del SGTG</button>
+                  </Link>
+                </div>
               </div>
-            </Link>
-            <Link to="/acerca" style={{ textDecoration: 'none' }}>
-              <div
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #facc15',
-                  borderRadius: '0.75rem',
-                  boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-                  padding: '1.25rem',
-                  textAlign: 'center',
-                  color: '#1e3a8a',
-                  transition: 'transform .15s ease, box-shadow .15s ease'
-                }}
-              >
-                <div style={{ fontSize: '2rem' }}>📘</div>
-                <h3 style={{ fontWeight: 800, marginTop: '0.5rem' }}>Acerca del SGTG</h3>
-                <p style={{ color: '#374151', marginTop: '0.25rem' }}>Objetivos, alcances y beneficios.</p>
-              </div>
-            </Link>
-            <Link to="/contacto" style={{ textDecoration: 'none' }}>
-              <div
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #facc15',
-                  borderRadius: '0.75rem',
-                  boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-                  padding: '1.25rem',
-                  textAlign: 'center',
-                  color: '#1e3a8a',
-                  transition: 'transform .15s ease, box-shadow .15s ease'
-                }}
-              >
-                <div style={{ fontSize: '2rem' }}>📨</div>
-                <h3 style={{ fontWeight: 800, marginTop: '0.5rem' }}>Soporte FCEAC</h3>
-                <p style={{ color: '#374151', marginTop: '0.25rem' }}>Comunícate con el equipo.</p>
-              </div>
-            </Link>
-          </div>
-        </section>
 
-        {/* CÓMO USAR (YA EXISTE) */}
-        <section
-          className="reveal"
-          style={{
-            margin: '2rem auto 0',
-            background: 'rgba(255,255,255,0.95)',
-            border: '1px solid #facc15',
-            borderRadius: '0.75rem',
-            boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-            padding: '1.25rem'
-          }}
-        >
-          <h2 style={{ color: '#1e3a8a', fontWeight: 800, textAlign: 'center', marginBottom: '0.75rem' }}>
-            ¿Cómo usar la plataforma?
-          </h2>
-          <ol style={{ listStyle: 'decimal inside', color: '#1e293b', fontSize: '1.05rem', lineHeight: 1.6 }}>
-            <li>Ingresa con tu cuenta institucional UNAH.</li>
-            <li>Selecciona el trámite que deseas realizar.</li>
-            <li>Sube los documentos requeridos y verifica requisitos.</li>
-            <li>Da seguimiento al estado y recibe notificaciones.</li>
-          </ol>
-          <p style={{ marginTop: '0.75rem', color: '#374151', fontStyle: 'italic' }}>
-            Consejo: Revisa frecuentemente tu correo institucional y la plataforma para confirmar avances.
-          </p>
-
-          {/* NUEVO: PASOS CON ÍCONOS (COMPLEMENTO VISUAL) */}
-          <div
-            style={{
-              marginTop: '0.75rem',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '0.75rem'
-            }}
-          >
-            {[
-              { icon: '🔑', t: 'Ingresa', d: 'Con tu cuenta UNAH.' },
-              { icon: '🧾', t: 'Elige trámite', d: 'Selecciona el proceso.' },
-              { icon: '📤', t: 'Sube documentos', d: 'Adjunta requisitos.' },
-              { icon: '📊', t: 'Da seguimiento', d: 'Revisa tu estado.' }
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #facc15',
-                  borderRadius: '0.5rem',
-                  padding: '0.75rem',
-                  textAlign: 'center'
-                }}
-              >
-                <div style={{ fontSize: '1.6rem' }}>{item.icon}</div>
-                <div style={{ color: '#1e3a8a', fontWeight: 800, marginTop: '0.25rem' }}>{item.t}</div>
-                <div style={{ color: '#374151' }}>{item.d}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* AVISOS / BENEFICIOS RÁPIDOS */}
-        <section className="reveal" style={{ margin: '2rem auto 0', maxWidth: '1100px' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-              gap: '1rem'
-            }}
-          >
-            {[
-              { icon: '⚡', t: 'Rápido y centralizado', d: 'Todo el proceso en una sola plataforma.' },
-              { icon: '🔔', t: 'Notificaciones', d: 'Enteráte de cambios y requisitos al instante.' },
-              { icon: '🔒', t: 'Seguro', d: 'Tus datos se manejan con confidencialidad.' }
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #facc15',
-                  borderRadius: '0.75rem',
-                  boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-                  padding: '1rem',
-                  textAlign: 'center'
-                }}
-              >
-                <div style={{ fontSize: '1.75rem' }}>{item.icon}</div>
-                <h3 style={{ color: '#1e3a8a', fontWeight: 800, marginTop: '0.4rem' }}>{item.t}</h3>
-                <p style={{ color: '#374151', marginTop: '0.25rem' }}>{item.d}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* NUEVO: NOTICIAS Y AVISOS IMPORTANTES */}
-        <section
-          className="reveal"
-          style={{
-            margin: '2rem auto 0',
-            background: '#ffffff',
-            border: '1px solid #facc15',
-            borderRadius: '0.75rem',
-            boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-            padding: '1rem',
-            maxWidth: '1100px'
-          }}
-        >
-          <h2 style={{ color: '#1e3a8a', fontWeight: 800, textAlign: 'center', marginBottom: '0.75rem' }}>
-            Noticias y avisos importantes
-          </h2>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: '1rem'
-            }}
-          >
-            {[
-              // Avisos existentes
-              { fecha: '15 Mar 2025', t: 'Inscripción a acto de graduación', d: 'Inicio del periodo de inscripción.' },
-              { fecha: '28 Mar 2025', t: 'Límite carga de documentos', d: 'Último día para adjuntar requisitos.' },
-              { fecha: '05 Abr 2025', t: 'Revisión de expedientes', d: 'Publicación de observaciones.' },
-              // Avisos de la imagen (formato tal cual)
-              { fecha: '4 agosto', t: 'Recepción de expedientes', d: 'Inicio de recepción de expedientes (Ceremonia dic. 2025).' },
-              { fecha: '8 sept.', t: 'Límite con honores', d: 'Límite para entregar expedientes que soliciten honores académicos.' },
-              { fecha: '30 sept.', t: 'Límite sin honores', d: 'Límite para entregar expedientes sin distinción honorífica.' },
-              { fecha: '13 dic.', t: 'Ceremonia de Graduación Pública', d: 'Ceremonia de Graduación Pública (Diciembre 2025).' }
-            ].map((n, idx) => (
-              <div
-                key={idx}
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #facc15',
-                  borderRadius: '0.75rem',
-                  boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-                  padding: '1rem'
-                }}
-              >
-                <div style={{ color: '#b45309', fontWeight: 700 }}>{n.fecha}</div>
-                <h3 style={{ color: '#1e3a8a', fontWeight: 800, margin: '0.25rem 0' }}>{n.t}</h3>
-                <p style={{ color: '#374151', marginBottom: '0.5rem' }}>{n.d}</p>
-                <Link to="/tramites" style={{ color: '#1e3a8a', fontWeight: 700, textDecoration: 'underline' }}>
-                  Ver detalles
-                </Link>
-              </div>
-            ))}
-
-            {/* Nota importante (de la imagen) */}
-            <div
-              style={{
-                gridColumn: '1 / -1',
-                background: '#ffffff',
-                border: '1px solid #facc15',
-                borderRadius: '0.75rem',
-                boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-                padding: '1rem'
-              }}
-            >
-              <h3 style={{ color: '#1e3a8a', fontWeight: 800, marginBottom: '0.35rem', textAlign: 'center' }}>
-                Nota importante
-              </h3>
-              <p style={{ color: '#374151', lineHeight: 1.6, textAlign: 'center' }}>
-                Tomar en cuenta que las fechas límite para entregar Expedientes de Graduación a la Oficina de Trámite de Título
-                son distintas a las publicadas por Secretaría General y VOAE, ya que hay un proceso previo de verificación
-                y digitalización de cada expediente.
-              </p>
+              {/* Aside fechas (100% ancho en móvil) */}
+              <aside className="reveal w-full" style={{ ...glassCard, overflow: 'hidden' }}>
+                <div className="border-b border-slate-200 font-extrabold text-slate-900 p-4">
+                  Próximas fechas
+                </div>
+                <div className="p-4 grid gap-3">
+                  {fechasProximas.map((n, idx) => (
+                    <div
+                      key={idx}
+                      className="grid items-center gap-2"
+                      style={{ gridTemplateColumns: 'minmax(74px, 92px) 1fr' }}
+                    >
+                      <div
+                        className="text-center font-extrabold rounded"
+                        style={{
+                          background: '#fff7ed',
+                          color: '#9a3412',
+                          border: '1px solid #fde68a',
+                          padding: '6px 8px',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {n.f}
+                      </div>
+                      <div className="font-semibold text-slate-800 break-words hyphens-auto">{n.t}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-4 pb-4">
+                  <Link to="/tramites" style={{ textDecoration: 'none' }} className="block w-full">
+                    <button className="btn btn-primary-unah w-full">Ir a Trámites</button>
+                  </Link>
+                </div>
+              </aside>
             </div>
           </div>
         </section>
 
-        {/* PREGUNTAS FRECUENTES */}
-        <section
-          className="reveal"
-          style={{
-            margin: '2rem auto',
-            background: '#ffffff',
-            border: '1px solid #facc15',
-            borderRadius: '0.75rem',
-            boxShadow: '0 2px 12px rgba(30,58,138,0.08)',
-            padding: '1rem'
-          }}
-        >
-          <h2 style={{ color: '#1e3a8a', fontWeight: 800, textAlign: 'center', marginBottom: '0.75rem' }}>
-            Preguntas frecuentes
-          </h2>
-          <details style={{ margin: '0.5rem 0' }}>
-            <summary style={{ cursor: 'pointer', color: '#1e3a8a', fontWeight: 700 }}>¿Necesito cuenta institucional?</summary>
-            <p style={{ color: '#374151', marginTop: '0.25rem' }}>Sí, utiliza tu correo y credenciales UNAH para ingresar.</p>
-          </details>
-          <details style={{ margin: '0.5rem 0' }}>
-            <summary style={{ cursor: 'pointer', color: '#1e3a8a', fontWeight: 700 }}>¿Cómo doy seguimiento a mi trámite?</summary>
-            <p style={{ color: '#374151', marginTop: '0.25rem' }}>Desde “Trámites” verás el estado y recibirás notificaciones.</p>
-          </details>
-          <details style={{ margin: '0.5rem 0' }}>
-            <summary style={{ cursor: 'pointer', color: '#1e3a8a', fontWeight: 700 }}>¿Dónde consulto requisitos?</summary>
-            <p style={{ color: '#374151', marginTop: '0.25rem' }}>Al iniciar un trámite, el sistema te muestra requisitos y formatos.</p>
-          </details>
+        {/* KPIs */}
+        <section id="indicadores" className="reveal section-gap">
+          <div className="w-full max-w-[1200px] mx-auto px-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {kpis.map((x, i) => (
+                <div key={i} className="text-center" style={{ ...glassCard, padding: 'clamp(.7rem, .8vw + .45rem, 1.05rem)' }}>
+                  <div className="text-slate-100" style={{ fontSize: 'clamp(1.2rem, 1vw + .9rem, 1.5rem)', fontWeight: 900, color: '#0f172a' }}>
+                    {x.v}
+                  </div>
+                  <div className="font-extrabold text-slate-900 mt-0.5">{x.k}</div>
+                  <div className="text-slate-600 text-[13px] mt-0.5">{x.d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
-        {/* CTA FINAL */}
-        <section className="reveal" style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <Link to="/tramites" style={{ textDecoration: 'none' }}>
-            <button
-              style={{
-                background: '#facc15',
-                color: '#1e3a8a',
-                fontWeight: 800,
-                border: 0,
-                borderRadius: '0.5rem',
-                padding: '0.75rem 1.5rem',
-                cursor: 'pointer',
-                boxShadow: '0 2px 10px rgba(30,58,138,0.15)'
-              }}
-            >
-              Comenzar un trámite
-            </button>
-          </Link>
+        {/* Recurso académico */}
+        <section id="recursos" className="reveal section-gap">
+          <div className="w-full max-w-[1200px] mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-4" style={{ ...glassCard, padding: 'clamp(1rem, 1vw, 1.25rem)' }}>
+              <div>
+                <h2 className="font-extrabold text-slate-900 mb-1">Guía oficial de requisitos de graduación</h2>
+                <p className="text-slate-600">Consulta el documento actualizado de la FCEAC (UNAH) y prepara tu expediente con anticipación.</p>
+              </div>
+              <div className="text-right">
+                <a
+                  className="btn btn-primary-unah"
+                  href="https://cienciaseconomicas.unah.edu.hn/dmsdocument/15965-requisitos-de-graduacion"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Ver/Descargar PDF
+                </a>
+              </div>
+            </div>
+          </div>
         </section>
 
-        {/* NUEVO: PIE DE PÁGINA (ENLACES ÚTILES) */}
+        {/* Timeline */}
+        <section id="proceso" className="reveal section-gap">
+          <div className="w-full max-w-[1200px] mx-auto px-4">
+            <h2 className="text-center font-extrabold mb-3" style={{ color: '#e2e8f0' }}>Tu proceso en 4 pasos</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {pasos.map((p) => (
+                <div key={p.n} className="grid gap-2" style={{ ...glassCard, borderRadius: 12, padding: 'clamp(.85rem, .8vw + .45rem, 1rem)' }}>
+                  <div className="flex items-center gap-2">
+                    <span className="grid place-items-center rounded-full" style={{ background: '#facc15', color: '#0f172a', fontWeight: 900, width: 36, height: 36 }}>{p.n}</span>
+                    <span className="font-extrabold text-slate-900">{p.t}</span>
+                  </div>
+                  <div className="text-slate-600 text-sm">{p.d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Avisos */}
+        <section id="avisos" className="reveal section-gap">
+          <div className="w-full max-w-[1200px] mx-auto px-4">
+            <h2 className="text-center font-extrabold mb-3" style={{ color: '#e2e8f0' }}>Noticias y avisos</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {avisos.map((n, idx) => (
+                <div key={idx} className="break-words hyphens-auto" style={{ ...glassCard, borderRadius: 12, padding: '1rem' }}>
+                  <div className="font-bold" style={{ color: '#9a3412' }}>{n.fecha}</div>
+                  <div className="font-extrabold text-slate-900 my-1">{n.t}</div>
+                  <div className="text-slate-600 mb-2">{n.d}</div>
+                  <Link to="/tramites" style={{ color: '#0f172a', fontWeight: 700, textDecoration: 'underline' }}>Ver detalles</Link>
+                </div>
+              ))}
+              <div className="break-words hyphens-auto" style={{ gridColumn: '1 / -1', ...glassCard, borderRadius: 12, padding: '1rem' }}>
+                <strong style={{ color: '#0f172a' }}>Nota importante</strong>
+                <p className="text-slate-600 mt-1.5">
+                  Las fechas límite para entregar expedientes a la Oficina de Trámite de Título son previas a las publicadas por Secretaría General y VOAE, pues existe un proceso interno de verificación y digitalización.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section id="faq" className="reveal section-gap">
+          <div className="w-full max-w-[1200px] mx-auto px-4">
+            <div style={{ ...glassCard, padding: '1rem' }}>
+              <h2 className="text-center font-extrabold mb-3" style={{ color: '#0f172a' }}>Preguntas frecuentes</h2>
+              <details className="mb-2">
+                <summary className="cursor-pointer font-bold" style={{ color: '#0f172a' }}>¿Necesito cuenta institucional?</summary>
+                <p className="text-slate-600 mt-1">Puedes ingresar con tu cuenta institucional UNAH o un correo personal válido.</p>
+              </details>
+              <details className="mb-2">
+                <summary className="cursor-pointer font-bold" style={{ color: '#0f172a' }}>¿Cómo doy seguimiento a mi trámite?</summary>
+                <p className="text-slate-600 mt-1">Desde “Trámites” y tu panel verás estados y recibirás notificaciones.</p>
+              </details>
+              <details className="mb-2">
+                <summary className="cursor-pointer font-bold" style={{ color: '#0f172a' }}>¿Dónde consulto requisitos?</summary>
+                <p className="text-slate-600 mt-1">En la guía oficial y al iniciar un trámite el sistema te mostrará los requisitos aplicables.</p>
+              </details>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer institucional (azul UNAH con borde superior dorado) */}
         <footer
           className="reveal"
-          style={{
-            background: '#1e3a8a',
-            color: '#ffffff',
-            borderTop: '4px solid #facc15',
-            marginTop: '1rem',
-            padding: '1rem 0.75rem'
-          }}
+          role="contentinfo"
+          style={{ background: '#1e3a8a', color: '#ffffff', borderTop: '4px solid #facc15', marginTop: '1rem', padding: '1rem 0.75rem' }}
         >
           <div
-            style={{
-              maxWidth: '1100px',
-              margin: '0 auto',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '0.75rem',
-              alignItems: 'center'
-            }}
+            className="w-full max-w-[1200px] mx-auto px-4 grid gap-3"
+            style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', alignItems: 'center' }}
           >
-            <div style={{ fontWeight: 800, letterSpacing: '0.5px' }}>SGTG – FCEAC UNAH</div>
-            <div style={{ textAlign: 'center' }}>
-              <a href="https://www.unah.edu.hn" target="_blank" rel="noreferrer" style={{ color: '#facc15', textDecoration: 'underline', marginRight: '0.5rem' }}>
-                UNAH
-              </a>
-              <a href="https://campusvirtual.unah.edu.hn" target="_blank" rel="noreferrer" style={{ color: '#facc15', textDecoration: 'underline', marginRight: '0.5rem' }}>
-                Campus Virtual
-              </a>
-              <a href="https://cienciaseconomicas.unah.edu.hn/" target="_blank" rel="noreferrer" style={{ color: '#facc15', textDecoration: 'underline' }}>
-                FCEAC
-              </a>
+            <div className="font-extrabold tracking-wide">SGTG – FCEAC UNAH</div>
+            <div className="text-center">
+              <a href="https://www.unah.edu.hn" target="_blank" rel="noreferrer" style={{ color: '#facc15', textDecoration: 'underline', marginRight: '0.5rem' }}>UNAH</a>
+              <a href="https://campusvirtual.unah.edu.hn" target="_blank" rel="noreferrer" style={{ color: '#facc15', textDecoration: 'underline', marginRight: '0.5rem' }}>Campus Virtual</a>
+              <a href="https://cienciaseconomicas.unah.edu.hn/" target="_blank" rel="noreferrer" style={{ color: '#facc15', textDecoration: 'underline' }}>FCEAC</a>
             </div>
-            <div style={{ textAlign: 'right', fontSize: '0.95rem' }}>
-              © {new Date().getFullYear()} FCEAC – UNAH
-            </div>
+            <div className="text-right text-[0.95rem]">© {new Date().getFullYear()} FCEAC – UNAH</div>
           </div>
         </footer>
-        {/* FIN NUEVAS SECCIONES */}
       </div>
     </div>
   );
 }
 
 export default Landing;
+// No requiere cambios aquí para logout automático, el Navbar lo maneja.

@@ -1,16 +1,22 @@
+// frontend/src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter } from 'react-router-dom';
+
 import App from './App';
 import './styles/tailwind.css';
 import { AuthProvider } from './state/AuthContext';
 
 const rootElement = document.getElementById('root');
+
 if (rootElement) {
   ReactDOM.render(
     <React.StrictMode>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </BrowserRouter>
     </React.StrictMode>,
     rootElement
   );

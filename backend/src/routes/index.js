@@ -1,35 +1,32 @@
 const express = require('express');
 const router = express.Router();
-const { getTramites, createTramite, listTables, getTableColumns, getTableRows, insertRowInTable, ensureCoreTables, registerUser, loginUser, refreshAccessToken, forgotPassword, verify2FA, logout } = require('../controllers/index');
-const db = require('../config/database'); // <- Importar la conexión a la BD
 
-// NUEVO: sub-routers de autenticación, usuarios y expedientes
-const usersRouter = require('./users');
-const expedientesRouter = require('./expedientes');
+const { requireAuth } = require('../middlewares/auth');
+const {
+  getTramites,
+  createTramite,
+  listTables,
+  getTableColumns,
+  getTableRows,
+  insertRowInTable,
+  ensureCoreTables
+} = require('../controllers');
 
-// NUEVO: Auth básica (registro y login)
-router.post('/auth/register', registerUser);
-router.post('/auth/login', loginUser);
-router.post('/auth/2fa-verify', verify2FA);
-router.post('/auth/refresh', refreshAccessToken); // NUEVO
-router.post('/auth/forgot-password', forgotPassword);
-router.post('/auth/logout', logout);
+// Rutas de trámites
+router.get('/tramites', requireAuth, getTramites);
+router.post('/tramites', requireAuth, createTramite);
 
-// Rutas para los trámites
-router.get('/tramites', getTramites);
-router.post('/tramites', createTramite);
-
-// Rutas genéricas para consultar tus tablas existentes
-router.get('/db/tables', listTables);                // Lista de tablas
-router.get('/table/:name/columns', getTableColumns); // Columnas de una tabla
-router.get('/table/:name', getTableRows);            // Filas con paginación/orden
-router.post('/table/:name', insertRowInTable);       // Insertar una fila
+// Rutas genéricas para consultar tablas (protegidas)
+router.get('/db/tables', requireAuth, listTables);
+router.get('/table/:name/columns', requireAuth, getTableColumns);
+router.get('/table/:name', requireAuth, getTableRows);
+router.post('/table/:name', requireAuth, insertRowInTable);
 
 // Verificar/crear tablas base (opcional)
-router.post('/db/ensure-core', ensureCoreTables);
+router.post('/db/ensure-core', requireAuth, ensureCoreTables);
 
-// Endpoint de landing: devolver fallback sin tocar BD
-router.get('/landing', (req, res) => {
+// Landing (fallback simple)
+router.get('/landing', (_req, res) => {
   const fallback = {
     titulo: 'Bienvenido al Sistema de Gestión de Trámites de Graduación',
     descripcion: 'En nuestra página podrás gestionar todo tu proceso de graduación de manera rápida y sencilla, sin complicaciones.',
@@ -39,11 +36,29 @@ router.get('/landing', (req, res) => {
       'Recibe notificaciones y recordatorios oportunos.'
     ]
   };
-  return res.json(fallback);
+  res.json(fallback);
 });
 
-// NUEVO: montar módulos
-router.use('/users', usersRouter);
-router.use('/expedientes', expedientesRouter);
+// Nota: Si necesitas montar rutas de estudiante, impórtalas y úsalas aquí.
+// Ejemplo (cuando exista el módulo):
+// const estudianteRouter = require('./estudiante');
+// router.use('/estudiante', estudianteRouter);
+
+// Ruta específica para obtener usuarios
+router.get('/table/usuario_sistema', requireAuth, async (req, res) => {
+  try {
+    const limit = Number(req.query.limit || 500);
+    const rows = await db.promise().query(`
+      SELECT id_usuario, nombre_usuario, apellido_usuario, correo_usuario, fecha_creacion
+      FROM usuario_sistema
+      ORDER BY id_usuario
+      LIMIT ?
+    `, [limit]);
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Error al obtener usuarios:', err);
+    res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
+});
 
 module.exports = router;

@@ -5,10 +5,8 @@ import Home from './pages/Home';
 import Tramites from './pages/Tramites';
 import Contacto from './pages/Contacto';
 import AcercaSGTG from './pages/AcercaSGTG';
-import Landing from './pages/Landing'; // <-- importar aquí
+import Landing from './pages/Landing';
 import Login from './pages/Login';
-
-// NUEVO
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import Verify2FA from './pages/auth/Verify2FA';
@@ -17,6 +15,8 @@ import DashEstudiante from './pages/dash/DashboardEstudiante';
 import DashCoordinador from './pages/dash/DashboardCoordinador';
 import DashAdministrativo from './pages/dash/DashboardAdministrativo';
 import DashSecretaria from './pages/dash/DashboardSecretaria';
+import DashboardExpediente from './pages/dash/DashboardExpediente';
+import CentroRecursos from './pages/CentroRecursos';
 
 function App() {
   useEffect(() => {
@@ -29,7 +29,7 @@ function App() {
   return (
     <Router>
       <Navbar />
-      <div className="container mx-auto mt-8">
+      <main>
         <Switch>
           {/* públicas */}
           <Route exact path="/" component={Landing} />
@@ -39,6 +39,7 @@ function App() {
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
           <Route path="/forgot-password" component={ForgotPassword} />
+          <Route path="/verify-2fa" component={Verify2FA} />  {/* alias corregido */}
           <Route path="/2fa" component={Verify2FA} />
 
           {/* privadas por rol */}
@@ -46,8 +47,11 @@ function App() {
           <PrivateRoute path="/panel/coordinador" roles={['coordinador']} component={DashCoordinador} />
           <PrivateRoute path="/panel/administrativo" roles={['administrativo']} component={DashAdministrativo} />
           <PrivateRoute path="/panel/secretaria" roles={['secretaria_general']} component={DashSecretaria} />
+          {/* NUEVA RUTA: Expedientes (solo para estudiantes) */}
+          <PrivateRoute path="/expedientes" roles={['estudiante']} component={DashboardExpediente} />
+          <Route path="/recursos" component={CentroRecursos} />
         </Switch>
-      </div>
+      </main>
     </Router>
   );
 }

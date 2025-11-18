@@ -1,39 +1,41 @@
+/* Card principal estilo “glass” coherente con Landing */
 .contacto-card {
   animation: fade-in 0.8s cubic-bezier(0.4,0,0.2,1);
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 2px 16px rgba(30,58,138,0.10);
-  padding: 2.5rem 2rem 2rem 2rem;
+  background: rgba(230,236,245,0.95);
+  backdrop-filter: saturate(110%) blur(4px);
+  border: 1px solid #b6c2d1;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(2,6,23,0.10);
+  padding: 1.25rem;
   text-align: center;
   max-width: 34rem;
   margin: 3rem auto 0 auto;
-  border: 1px solid #facc15;
 }
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .contacto-title {
-  font-size: 2.2rem;
+  font-size: 1.85rem;
   font-weight: 900;
-  margin-bottom: 1.2rem;
-  color: #1e3a8a;
-  text-shadow: 1px 1px 2px #facc1533;
+  margin-bottom: .5rem;
+  color: #0f172a;
 }
 .contacto-desc {
-  font-size: 1.15rem;
-  color: #374151;
-  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+  color: #334155;
+  margin-bottom: .5rem;
 }
 .contacto-mail {
-  color: #facc15;
-  font-weight: bold;
+  color: #f59e0b;
+  font-weight: 800;
   text-decoration: underline;
-  transition: color 0.2s;
-  font-size: 1.1rem;
 }
-.contacto-mail:hover {
-  color: #b45309;
+.contacto-mail:hover { color: #b45309; }
+.contacto-info {
+  color: #1f2937;
+  margin-top: .5rem;
+  font-size: .98rem;
 }
 @media (max-width: 768px) {
   .contacto-card {
@@ -42,7 +44,7 @@
     margin-top: 2rem;
   }
   .contacto-title {
-    font-size: 1.75rem;
+    font-size: 1.6rem;
     margin-bottom: 0.9rem;
   }
   .contacto-desc {
@@ -50,6 +52,9 @@
   }
   .contacto-mail {
     font-size: 1rem;
+  }
+  .contacto-info {
+    font-size: .95rem;
   }
 }
 @media (max-width: 480px) {
