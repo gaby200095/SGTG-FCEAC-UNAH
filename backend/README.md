@@ -84,17 +84,27 @@ Respuesta:
 { "id": 123, "affectedRows": 1 }
 ```
 
-## Autenticación y 2FA (Actualizado)
-- Login normal: POST /api/auth/login
-- Habilitar 2FA (genera secreto si no existe): POST /api/auth/login?enable2fa=1 con credenciales.
-- Si el usuario tiene 2FA activo: login devuelve { requires2FA:true, tempToken }.
-- Verificar código TOTP: POST /api/auth/2fa-verify { tempToken, code } → emite accessToken + cookie refresh.
-- Refresh token: POST /api/auth/refresh (usa cookie httpOnly 'rt').
+## Autenticación (self-hosted JWT)
+- Login: POST /api/auth/login con body { correo, password } → devuelve { ok, user, accessToken } y setea cookie httpOnly 'rt'.
+- Refresh: POST /api/auth/refresh (la cookie rt se envía sola en navegador) → devuelve nuevo accessToken.
+- Logout: POST /api/auth/logout → limpia cookie rt.
 
-Instalar dependencia:
-```
-npm install speakeasy
-```
+Protección de endpoints:
+- Los endpoints de datos como /api/expedientes y /api/table/* requieren header Authorization: Bearer <accessToken>.
+
+Pruebas rápidas:
+- Salud:
+  curl -i http://localhost:5001/api/health
+- Login:
+  curl -i -X POST http://localhost:5001/api/auth/login -H "Content-Type: application/json" -d "{\"correo\":\"tu@correo\",\"password\":\"tuPass\"}"
+- Con token:
+  curl -i http://localhost:5001/api/expedientes -H "Authorization: Bearer ACCESS_TOKEN_AQUI"
+- Refresh (con cookie rt):
+  curl -i -X POST http://localhost:5001/api/auth/refresh --cookie "rt=VALOR_COOKIE"
+
+Notas:
+- Inactividad: tras 15 min sin uso, los tokens responderán 401 y el frontend cerrará sesión.
+- No se usa Firebase ni proveedores externos de autenticación.
 
 ## Verificar registros (API genérica de tablas)
 - Listar usuarios insertados:
@@ -114,5 +124,3 @@ npm install speakeasy
 Las contribuciones son bienvenidas. Si deseas contribuir, por favor abre un issue o envía un pull request.
 
 ## Licencia
-
-Este proyecto está bajo la Licencia MIT.
